@@ -22,8 +22,22 @@ app.get("/users/:id", async (req, res) => {
 })
 
 //get all shows watched by a user
+app.get("/users/:id/shows", async (req, res) => {
+	const userId = req.params.id
+	const userShows = await User.findByPk(userId, { include: Show })
+	res.json(userShows)
+})
 
 //associate a user with a show they have watched
+app.put("/users/:id/shows/:showid", async (req, res) => {
+	const userId = req.params.id
+	const showId = req.params.showid
+	const show = await Show.findByPk(showId)
+	const user = await User.findByPk(userId)
+	await user.addShow(show)
+	const updatedUser = await User.findByPk(userId, { include: Show })
+	res.json(updatedUser)
+})
 
 //****Show routes****
 
@@ -41,31 +55,32 @@ app.get("/shows/:id", async (req, res) => {
 })
 
 //get all users who watched a show
+app.get("/shows/:id/users", async (req, res) => {
+	const showId = req.params.id
+	const showsUser = await Show.findByPk(showId, { include: User })
+	res.json(showsUser)
+})
 
 //update the available property of a show
 app.put("/shows/:id/available", async (req, res) => {
 	const showId = req.params.id
-	const getShow = await Show.findByPk(showId)
-
-	if (getShow.availabe == 0) {
-		getShow.update({ available: 1 })
-	} else {
-		getShow.update({ available: 0 })
-	}
-
-	res.send("Show's availabilty has been updated!")
+	let getShow = await Show.findByPk(showId)
+	let updatedShow = await getShow.update({ available: !getShow.available })
+	res.json(updatedShow)
 })
 
 //delete a show
 app.delete("/shows/:id", async (req, res) => {
 	const showId = req.params.id
 	const deleteShow = await Show.destroy({ where: { id: showId } })
-	res.send("Show has been deleted!")
+	res.json(deleteShow)
 })
 
 //get shows of a particular genre
-app.get("/shows/:genre", async (req, res) => {
+app.get("/shows/genre/:genre", async (req, res) => {
 	const showGenre = req.params.genre
 	const getShowsGenre = await Show.findAll({ where: { genre: showGenre } })
 	res.json(getShowsGenre)
 })
+
+module.exports = app
