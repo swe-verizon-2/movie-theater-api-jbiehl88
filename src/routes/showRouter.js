@@ -60,21 +60,17 @@ showRouter.post(
 	}
 )
 
-showRouter.put(
-	"/:id",
-	[check(["title", "genre", "available"]).not().isEmpty().trim(), check("title").isLength({ min: 4, max: 25 }), check("available").isBoolean()],
-	async (req, res) => {
-		const errors = validationResult(req)
-		if (!errors.isEmpty()) {
-			res.json({ error: errors.array() })
-		} else {
-			let showId = req.params.id
-			let foundShow = await Show.findByPk(showId)
-			let updateShow = await foundShow.update(req.body)
-			res.json(updateShow)
-		}
+showRouter.put("/:id", [check("title").isLength({ min: 4, max: 25 }).optional(), check("available").isBoolean().optional()], async (req, res) => {
+	const errors = validationResult(req)
+	if (!errors.isEmpty()) {
+		res.json({ error: errors.array() })
+	} else {
+		let showId = req.params.id
+		let foundShow = await Show.findByPk(showId)
+		let updateShow = await foundShow.update(req.body)
+		res.json(updateShow)
 	}
-)
+})
 
 module.exports = {
 	showRouter,

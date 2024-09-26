@@ -56,9 +56,9 @@ userRouter.post(
 userRouter.put(
 	"/:id",
 	[
-		check(["username", "password"]).not().isEmpty().trim(),
-		check("username").isEmail(),
-		check("password").isStrongPassword({ minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 }),
+		// check(["username", "password"]).not().isEmpty().trim(),
+		check("username").isEmail().optional(),
+		check("password").isStrongPassword({ minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 }).optional(),
 	],
 	async (req, res) => {
 		const errors = validationResult(req)
