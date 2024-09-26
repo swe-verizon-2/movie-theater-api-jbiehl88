@@ -1,9 +1,8 @@
 const express = require("express")
 const { Show, User } = require("../../models/index")
+const { check, validationResult } = require("express-validator")
 
 const showRouter = express.Router()
-
-//****Show routes****
 
 //get all shows
 showRouter.get("/", async (req, res) => {
@@ -46,6 +45,36 @@ showRouter.get("/genre/:genre", async (req, res) => {
 	const getShowsGenre = await Show.findAll({ where: { genre: showGenre } })
 	res.json(getShowsGenre)
 })
+
+showRouter.post(
+	"/",
+	[check(["title", "genre", "available"]).not().isEmpty().trim(), check("title").isLength({ min: 4, max: 30 }), check("available").isBoolean()],
+	async (req, res) => {
+		const errors = validationResult(req)
+		if (!errors.isEmpty()) {
+			res.json({ error: errors.array() })
+		} else {
+			const createShow = await Show.create(req.body)
+			res.json(createShow)
+		}
+	}
+)
+
+showRouter.put(
+	"/:id",
+	[check(["title", "genre", "available"]).not().isEmpty().trim(), check("title").isLength({ min: 4, max: 30 }), check("available").isBoolean()],
+	async (req, res) => {
+		const errors = validationResult(req)
+		if (!errors.isEmpty()) {
+			res.json({ error: errors.array() })
+		} else {
+			let showId = req.params.id
+			let foundShow = await Show.findByPk(showId)
+			let updateShow = await foundShow.update(req.body)
+			res.json(updateShow)
+		}
+	}
+)
 
 module.exports = {
 	showRouter,

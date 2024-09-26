@@ -1,9 +1,8 @@
 const express = require("express")
 const { Show, User } = require("../../models/index")
+const { check, validationResult } = require("express-validator")
 
 const userRouter = express.Router()
-
-//****User routes****
 
 //get all users
 userRouter.get("/", async (req, res) => {
@@ -35,6 +34,44 @@ userRouter.put("/:id/shows/:showid", async (req, res) => {
 	const updatedUser = await User.findByPk(userId, { include: Show })
 	res.json(updatedUser)
 })
+
+userRouter.post(
+	"/",
+	[
+		check(["username", "password"]).not().isEmpty().trim(),
+		check("username").isEmail(),
+		check("password").isStrongPassword({ minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 }),
+	],
+	async (req, res) => {
+		const errors = validationResult(req)
+		if (!errors.isEmpty()) {
+			res.json({ error: errors.array() })
+		} else {
+			const createUser = await User.create(req.body)
+			res.json(createUser)
+		}
+	}
+)
+
+userRouter.put(
+	"/:id",
+	[
+		check(["username", "password"]).not().isEmpty().trim(),
+		check("username").isEmail(),
+		check("password").isStrongPassword({ minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 }),
+	],
+	async (req, res) => {
+		const errors = validationResult(req)
+		if (!errors.isEmpty()) {
+			res.json({ error: errors.array() })
+		} else {
+			let userId = req.params.id
+			let foundUser = await User.findByPk(userId)
+			let updateUser = await foundUser.update(req.body)
+			res.json(updateUser)
+		}
+	}
+)
 
 module.exports = {
 	userRouter,
