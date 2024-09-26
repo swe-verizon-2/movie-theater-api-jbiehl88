@@ -1,6 +1,7 @@
 const express = require("express")
 const { Show, User } = require("../../models/index")
 const { check, validationResult } = require("express-validator")
+const { userCheckAllNotEmptyTrim, userCheckEmail, userCheckPassword } = require("../middleware/index")
 
 const userRouter = express.Router()
 
@@ -35,43 +36,27 @@ userRouter.put("/:id/shows/:showid", async (req, res) => {
 	res.json(updatedUser)
 })
 
-userRouter.post(
-	"/",
-	[
-		check(["username", "password"]).not().isEmpty().trim(),
-		check("username").isEmail(),
-		check("password").isStrongPassword({ minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 }),
-	],
-	async (req, res) => {
-		const errors = validationResult(req)
-		if (!errors.isEmpty()) {
-			res.json({ error: errors.array() })
-		} else {
-			const createUser = await User.create(req.body)
-			res.json(createUser)
-		}
+userRouter.post("/", [userCheckAllNotEmptyTrim, userCheckEmail, userCheckPassword], async (req, res) => {
+	const errors = validationResult(req)
+	if (!errors.isEmpty()) {
+		res.json({ error: errors.array() })
+	} else {
+		const createUser = await User.create(req.body)
+		res.json(createUser)
 	}
-)
+})
 
-userRouter.put(
-	"/:id",
-	[
-		// check(["username", "password"]).not().isEmpty().trim(),
-		check("username").isEmail().optional(),
-		check("password").isStrongPassword({ minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 }).optional(),
-	],
-	async (req, res) => {
-		const errors = validationResult(req)
-		if (!errors.isEmpty()) {
-			res.json({ error: errors.array() })
-		} else {
-			let userId = req.params.id
-			let foundUser = await User.findByPk(userId)
-			let updateUser = await foundUser.update(req.body)
-			res.json(updateUser)
-		}
+userRouter.put("/:id", [userCheckEmail.optional(), userCheckPassword.optional()], async (req, res) => {
+	const errors = validationResult(req)
+	if (!errors.isEmpty()) {
+		res.json({ error: errors.array() })
+	} else {
+		let userId = req.params.id
+		let foundUser = await User.findByPk(userId)
+		let updateUser = await foundUser.update(req.body)
+		res.json(updateUser)
 	}
-)
+})
 
 module.exports = {
 	userRouter,

@@ -1,6 +1,7 @@
 const express = require("express")
 const { Show, User } = require("../../models/index")
 const { check, validationResult } = require("express-validator")
+const { showTitleLength, showAvailCheck, showCheckMostNotEmptyTrim } = require("../middleware/index")
 
 const showRouter = express.Router()
 
@@ -46,21 +47,17 @@ showRouter.get("/genre/:genre", async (req, res) => {
 	res.json(getShowsGenre)
 })
 
-showRouter.post(
-	"/",
-	[check(["title", "genre", "available"]).not().isEmpty().trim(), check("title").isLength({ min: 4, max: 25 }), check("available").isBoolean()],
-	async (req, res) => {
-		const errors = validationResult(req)
-		if (!errors.isEmpty()) {
-			res.json({ error: errors.array() })
-		} else {
-			const createShow = await Show.create(req.body)
-			res.json(createShow)
-		}
+showRouter.post("/", [showCheckMostNotEmptyTrim, showTitleLength, showAvailCheck], async (req, res) => {
+	const errors = validationResult(req)
+	if (!errors.isEmpty()) {
+		res.json({ error: errors.array() })
+	} else {
+		const createShow = await Show.create(req.body)
+		res.json(createShow)
 	}
-)
+})
 
-showRouter.put("/:id", [check("title").isLength({ min: 4, max: 25 }).optional(), check("available").isBoolean().optional()], async (req, res) => {
+showRouter.put("/:id", [showTitleLength, showAvailCheck], async (req, res) => {
 	const errors = validationResult(req)
 	if (!errors.isEmpty()) {
 		res.json({ error: errors.array() })
