@@ -57,7 +57,7 @@ showRouter.post("/", [showCheckMostNotEmptyTrim, showTitleLength, showAvailCheck
 	}
 })
 
-showRouter.put("/:id", [showTitleLength, showAvailCheck], async (req, res) => {
+showRouter.put("/:id", [showTitleLength.optional(), showAvailCheck.optional()], async (req, res) => {
 	const errors = validationResult(req)
 	if (!errors.isEmpty()) {
 		res.json({ error: errors.array() })
