@@ -48,7 +48,7 @@ showRouter.get("/genre/:genre", async (req, res) => {
 
 showRouter.post(
 	"/",
-	[check(["title", "genre", "available"]).not().isEmpty().trim(), check("title").isLength({ min: 4, max: 30 }), check("available").isBoolean()],
+	[check(["title", "genre", "available"]).not().isEmpty().trim(), check("title").isLength({ min: 4, max: 25 }), check("available").isBoolean()],
 	async (req, res) => {
 		const errors = validationResult(req)
 		if (!errors.isEmpty()) {
@@ -62,7 +62,7 @@ showRouter.post(
 
 showRouter.put(
 	"/:id",
-	[check(["title", "genre", "available"]).not().isEmpty().trim(), check("title").isLength({ min: 4, max: 30 }), check("available").isBoolean()],
+	[check(["title", "genre", "available"]).not().isEmpty().trim(), check("title").isLength({ min: 4, max: 25 }), check("available").isBoolean()],
 	async (req, res) => {
 		const errors = validationResult(req)
 		if (!errors.isEmpty()) {
